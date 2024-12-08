@@ -19,6 +19,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         h1 {
             text-align: center;
@@ -28,6 +29,7 @@
             width: 100%;
             height: 80vh;
             overflow: auto;
+            position: relative;
         }
         canvas {
             display: block;
@@ -52,6 +54,10 @@
             text-decoration: none;
             border-radius: 5px;
         }
+        .link-overlay {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0); /* Make it transparent */
+        }
     </style>
 </head>
 <body>
@@ -66,7 +72,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
-
         const pdfContainer = document.getElementById('pdf-container');
 
         function renderPage(page, scale) {
@@ -98,7 +103,7 @@
                             link.style.height = `${annotation.rect[3] - annotation.rect[1]}px`;
                             link.style.transform = `scale(${scale})`;
                             link.style.transformOrigin = 'top left';
-                            link.style.opacity = 0;  // Make the link invisible
+                            link.classList.add('link-overlay');
                             pdfContainer.appendChild(link);
                         }
                     });
