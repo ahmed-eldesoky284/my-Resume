@@ -41,17 +41,29 @@
             margin-top: 20px;
             color: #666;
         }
+        .download-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #007ACC;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>سيرتي الذاتية</h1>
+        <a class="download-btn" href="Resume(cv)_Ahmedeldeosky (ATS).pdf" download>تحميل السيرة الذاتية</a>
         <div id="pdf-container"></div>
     </div>
     <footer>
         &copy; 2025 .Ahmed Eldesoky . جميع الحقوق محفوظة.
     </footer>
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
 
