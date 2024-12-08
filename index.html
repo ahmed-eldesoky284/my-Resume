@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,10 +24,14 @@
             text-align: center;
             color: #007ACC;
         }
-        iframe {
+        #pdf-container {
             width: 100%;
-            height: 80vh; /* Set height to 80% of the viewport height */
-            border: none;
+            height: 80vh;
+            overflow: auto;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
         }
         footer {
             text-align: center;
@@ -39,10 +43,82 @@
 <body>
     <div class="container">
         <h1>سيرتي الذاتية</h1>
-        <iframe src="Resume(cv)_Ahmedeldeosky (ATS).pdf" type="application/pdf"></iframe>
+        <div id="pdf-container"></div>
     </div>
     <footer>
         &copy; 2025 .Ahmed Eldesoky . جميع الحقوق محفوظة.
     </footer>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script>
+        const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
+
+        let pdfDoc = null,
+            pageNum = 1,
+            pageRendering = false,
+            pageNumPending = null,
+            scale = 1.5,
+            canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+
+        document.getElementById('pdf-container').appendChild(canvas);
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+
+            document.getElementById('page_num').textContent = num;
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+
+        function onPrevPage() {
+            if (pageNum <= 1) {
+                return;
+            }
+            pageNum--;
+            queueRenderPage(pageNum);
+        }
+
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages) {
+                return;
+            }
+            pageNum++;
+            queueRenderPage(pageNum);
+        }
+
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            document.getElementById('page_count').textContent = pdfDoc.numPages;
+            renderPage(pageNum);
+        });
+
+        document.getElementById('prev').addEventListener('click', onPrevPage);
+        document.getElementById('next').addEventListener('click', onNextPage);
+    </script>
 </body>
 </html>
