@@ -54,8 +54,6 @@
 
         let pdfDoc = null,
             pageNum = 1,
-            pageRendering = false,
-            pageNumPending = null,
             scale = 1.5,
             canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d');
@@ -63,7 +61,6 @@
         document.getElementById('pdf-container').appendChild(canvas);
 
         function renderPage(num) {
-            pageRendering = true;
             pdfDoc.getPage(num).then(function(page) {
                 const viewport = page.getViewport({ scale: scale });
                 canvas.height = viewport.height;
@@ -73,52 +70,22 @@
                     canvasContext: ctx,
                     viewport: viewport
                 };
+
                 const renderTask = page.render(renderContext);
 
                 renderTask.promise.then(function() {
-                    pageRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
+                    if (pageNum < pdfDoc.numPages) {
+                        pageNum++;
+                        renderPage(pageNum);
                     }
                 });
             });
-
-            document.getElementById('page_num').textContent = num;
-        }
-
-        function queueRenderPage(num) {
-            if (pageRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
-            }
-        }
-
-        function onPrevPage() {
-            if (pageNum <= 1) {
-                return;
-            }
-            pageNum--;
-            queueRenderPage(pageNum);
-        }
-
-        function onNextPage() {
-            if (pageNum >= pdfDoc.numPages) {
-                return;
-            }
-            pageNum++;
-            queueRenderPage(pageNum);
         }
 
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
             pdfDoc = pdfDoc_;
-            document.getElementById('page_count').textContent = pdfDoc.numPages;
             renderPage(pageNum);
         });
-
-        document.getElementById('prev').addEventListener('click', onPrevPage);
-        document.getElementById('next').addEventListener('click', onNextPage);
     </script>
 </body>
 </html>
