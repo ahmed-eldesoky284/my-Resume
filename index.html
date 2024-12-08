@@ -57,6 +57,7 @@
         .link-overlay {
             position: absolute;
             background-color: rgba(255, 255, 255, 0); /* Make it transparent */
+            cursor: pointer;
         }
     </style>
 </head>
@@ -73,6 +74,9 @@
     <script>
         const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
         const pdfContainer = document.getElementById('pdf-container');
+
+        // تحديد مقياس العرض لتحسين وضوح النصوص
+        const scale = 2.0; // يمكن زيادة المقياس حسب الحاجة
 
         function renderPage(page, scale) {
             const viewport = page.getViewport({ scale: scale });
@@ -112,7 +116,6 @@
         }
 
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
-            const scale = 1.5;
             for (let pageNum = 1; pageNum <= pdfDoc_.numPages; pageNum++) {
                 pdfDoc_.getPage(pageNum).then(page => renderPage(page, scale));
             }
