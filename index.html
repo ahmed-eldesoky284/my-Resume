@@ -54,10 +54,21 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        .link-overlay {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0); /* Make it transparent */
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background-color: #007ACC;
+            color: white;
+            padding: 10px 20px;
+            border: none;
             cursor: pointer;
+            border-radius: 5px;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -66,6 +77,11 @@
         <h1>سيرتي الذاتية</h1>
         <a class="download-btn" href="Resume(cv)_Ahmedeldeosky (ATS).pdf" download>تحميل السيرة الذاتية</a>
         <div id="pdf-container"></div>
+        <div class="pagination">
+            <button id="prev-page" onclick="changePage(-1)">السابق</button>
+            <span id="page-number">الصفحة 1</span>
+            <button id="next-page" onclick="changePage(1)">التالي</button>
+        </div>
     </div>
     <footer>
         &copy; 2025 .Ahmed Eldesoky . جميع الحقوق محفوظة.
@@ -74,51 +90,77 @@
     <script>
         const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
         const pdfContainer = document.getElementById('pdf-container');
+        let pdfDoc = null;
+        let currentPage = 1;
+        let totalPages = 0;
 
-        // تحديد مقياس العرض لتحسين وضوح النصوص
         const scale = 2.0; // يمكن زيادة المقياس حسب الحاجة
 
-        function renderPage(page, scale) {
-            const viewport = page.getViewport({ scale: scale });
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+        // لتحميل وعرض الصفحة
+        function renderPage(pageNum) {
+            pdfDoc.getPage(pageNum).then(page => {
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
 
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport
-            };
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
 
-            const renderTask = page.render(renderContext);
-            return renderTask.promise.then(() => {
-                pdfContainer.appendChild(canvas);
+                const renderTask = page.render(renderContext);
+                renderTask.promise.then(() => {
+                    pdfContainer.innerHTML = '';  // مسح الصفحة السابقة
+                    pdfContainer.appendChild(canvas);
 
-                return page.getAnnotations().then(annotationsData => {
-                    annotationsData.forEach(annotation => {
-                        if (annotation.subtype === 'Link' && annotation.url) {
-                            const link = document.createElement('a');
-                            link.href = annotation.url;
-                            link.target = '_blank';
-                            link.style.position = 'absolute';
-                            link.style.left = `${annotation.rect[0]}px`;
-                            link.style.top = `${annotation.rect[1]}px`;
-                            link.style.width = `${annotation.rect[2] - annotation.rect[0]}px`;
-                            link.style.height = `${annotation.rect[3] - annotation.rect[1]}px`;
-                            link.style.transform = `scale(${scale})`;
-                            link.style.transformOrigin = 'top left';
-                            link.classList.add('link-overlay');
-                            pdfContainer.appendChild(link);
-                        }
+                    // إضافة الروابط (annotations)
+                    page.getAnnotations().then(annotationsData => {
+                        annotationsData.forEach(annotation => {
+                            if (annotation.subtype === 'Link' && annotation.url) {
+                                const link = document.createElement('a');
+                                link.href = annotation.url;
+                                link.target = '_blank';
+                                link.style.position = 'absolute';
+                                link.style.left = `${annotation.rect[0]}px`;
+                                link.style.top = `${annotation.rect[1]}px`;
+                                link.style.width = `${annotation.rect[2] - annotation.rect[0]}px`;
+                                link.style.height = `${annotation.rect[3] - annotation.rect[1]}px`;
+                                link.style.transform = `scale(${scale})`;
+                                link.style.transformOrigin = 'top left';
+                                pdfContainer.appendChild(link);
+                            }
+                        });
                     });
+
+                    // تحديث رقم الصفحة المعروضة
+                    document.getElementById('page-number').textContent = `الصفحة ${currentPage}`;
                 });
             });
         }
 
+        // تغيير الصفحة
+        function changePage(direction) {
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            renderPage(currentPage);
+
+            // تمكين / تعطيل الأزرار
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        // تحميل الوثيقة
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
-            for (let pageNum = 1; pageNum <= pdfDoc_.numPages; pageNum++) {
-                pdfDoc_.getPage(pageNum).then(page => renderPage(page, scale));
-            }
+            pdfDoc = pdfDoc_;
+            totalPages = pdfDoc.numPages;
+            renderPage(currentPage);
+
+            // تعطيل الأزرار إذا كانت الصفحة الأولى أو الأخيرة
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
         });
     </script>
 </body>
