@@ -13,12 +13,13 @@
             padding: 20px;
         }
         .container {
-            max-width: 800px;
+            max-width: 100%;
             margin: 0 auto;
             background: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Prevent overflow */
         }
         h1 {
             text-align: center;
@@ -26,7 +27,7 @@
         }
         embed {
             width: 100%;
-            height: calc(100vh - 100px); /* Adjust height based on viewport */
+            height: 80vh; /* Adjust height to 80% of the viewport */
             border: none;
         }
         footer {
@@ -34,15 +35,57 @@
             margin-top: 20px;
             color: #666;
         }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            background-color: #007ACC;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .controls button:hover {
+            background-color: #005f8f;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>سيرتي الذاتية</h1>
-        <embed src="Resume(cv)_Ahmedeldeosky (ATS).pdf" type="application/pdf" />
+        <embed id="pdfViewer" src="Resume(cv)_Ahmedeldeosky (ATS).pdf" type="application/pdf" />
+        
+        <!-- Controls for navigating PDF -->
+        <div class="controls">
+            <button onclick="navigatePage('prev')">الصفحة السابقة</button>
+            <button onclick="navigatePage('next')">الصفحة التالية</button>
+            <button onclick="downloadPDF()">تحميل السيرة الذاتية</button>
+        </div>
     </div>
+
     <footer>
         &copy; 2025 .Ahmed Eldesoky . جميع الحقوق محفوظة.
     </footer>
+
+    <script>
+        // Navigate to next or previous page (not functional with <embed>)
+        function navigatePage(direction) {
+            // This will not work with <embed>, this is just for demo
+            alert('التنقل بين الصفحات غير مدعوم مباشرة مع <embed>.');
+        }
+
+        // Download PDF
+        function downloadPDF() {
+            const link = document.createElement('a');
+            link.href = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
+            link.download = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
+            link.click();
+        }
+    </script>
 </body>
 </html>
