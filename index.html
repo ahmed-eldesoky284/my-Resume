@@ -32,6 +32,9 @@
         canvas {
             display: block;
             margin: 0 auto;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
         }
         footer {
             text-align: center;
@@ -55,14 +58,13 @@
         let pdfDoc = null,
             pageNum = 1,
             scale = 1.5,
-            canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d');
-
-        document.getElementById('pdf-container').appendChild(canvas);
+            canvasContainer = document.getElementById('pdf-container');
 
         function renderPage(num) {
             pdfDoc.getPage(num).then(function(page) {
                 const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
@@ -74,6 +76,7 @@
                 const renderTask = page.render(renderContext);
 
                 renderTask.promise.then(function() {
+                    canvasContainer.appendChild(canvas);
                     if (pageNum < pdfDoc.numPages) {
                         pageNum++;
                         renderPage(pageNum);
