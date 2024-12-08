@@ -19,16 +19,15 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* Prevent overflow */
         }
         h1 {
             text-align: center;
             color: #007ACC;
         }
-        embed {
+        #pdf-container {
             width: 100%;
-            height: 80vh; /* Adjust height to 80% of the viewport */
-            border: none;
+            height: 80vh;
+            overflow: auto;
         }
         footer {
             text-align: center;
@@ -54,11 +53,14 @@
             background-color: #005f8f;
         }
     </style>
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>سيرتي الذاتية</h1>
-        <embed id="pdfViewer" src="Resume(cv)_Ahmedeldeosky (ATS).pdf" type="application/pdf" />
+        
+        <div id="pdf-container"></div>
         
         <!-- Controls for navigating PDF -->
         <div class="controls">
@@ -73,19 +75,62 @@
     </footer>
 
     <script>
-        // Navigate to next or previous page (not functional with <embed>)
-        function navigatePage(direction) {
-            // This will not work with <embed>, this is just for demo
-            alert('التنقل بين الصفحات غير مدعوم مباشرة مع <embed>.');
+        const url = 'Resume(cv)_Ahmedeldeosky (ATS).pdf'; // رابط ملف PDF
+        let pdfDoc = null;
+        let currentPage = 1;
+        let totalPages = 0;
+
+        // تحميل PDF وعرضه
+        function loadPDF() {
+            pdfjsLib.getDocument(url).promise.then(function(pdf) {
+                pdfDoc = pdf;
+                totalPages = pdf.numPages;
+                renderPage(currentPage);
+            });
         }
 
-        // Download PDF
+        // عرض الصفحة المطلوبة
+        function renderPage(pageNum) {
+            pdfDoc.getPage(pageNum).then(function(page) {
+                const scale = 1.5; // تغيير الحجم
+                const viewport = page.getViewport({ scale: scale });
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                });
+
+                const pdfContainer = document.getElementById('pdf-container');
+                pdfContainer.innerHTML = ''; // مسح الصفحة السابقة
+                pdfContainer.appendChild(canvas); // إضافة الصفحة الجديدة
+            });
+        }
+
+        // التنقل بين الصفحات
+        function navigatePage(direction) {
+            if (direction === 'next' && currentPage < totalPages) {
+                currentPage++;
+            } else if (direction === 'prev' && currentPage > 1) {
+                currentPage--;
+            }
+            renderPage(currentPage);
+        }
+
+        // تحميل PDF
         function downloadPDF() {
             const link = document.createElement('a');
-            link.href = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
+            link.href = url;
             link.download = 'Resume(cv)_Ahmedeldeosky (ATS).pdf';
             link.click();
         }
+
+        // تحميل PDF عند بدء الصفحة
+        loadPDF();
     </script>
 </body>
 </html>
